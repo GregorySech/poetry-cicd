@@ -2,7 +2,7 @@ from flask.app import Flask
 from flask.testing import FlaskCliRunner, FlaskClient
 import pytest
 
-from poetry_cicd.create_app import create_app
+from poetry_cicd import create_app
 
 
 @pytest.fixture
