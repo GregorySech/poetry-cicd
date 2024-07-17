@@ -7,3 +7,5 @@ In this project I'm following the book [Hypermedia Systems](hypermedia.systems) 
 
 ## Good to know
 Poetry's configuration is local and can be read into the `poetry.toml` file.
+
+Pyright's settings are defined inside the `[tool.pyright]` section of `pyproject.toml`.
