@@ -1,6 +1,6 @@
 from flask.testing import FlaskClient
 
-from poetry_cicd import create_app
+from poetry_cicd import create_testable_app
 from tests.fixtures import *
 
 

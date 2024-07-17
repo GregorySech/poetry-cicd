@@ -3,7 +3,7 @@ from flask.testing import FlaskCliRunner, FlaskClient
 from flask_sqlalchemy.extension import SQLAlchemy
 import pytest
 import os
-from poetry_cicd import Application, create_app
+from poetry_cicd import Application, create_testable_app
 import time
 
 
@@ -12,7 +12,7 @@ def application():
     os.environ["HTMCONTACTS_SQLALCHEMY_DATABASE_URI"] = (
         f"sqlite:///contacts-{time.time_ns()}.db"
     )
-    app = create_app()
+    app = create_testable_app()
     yield app
 
 
