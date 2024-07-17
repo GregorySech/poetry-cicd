@@ -2,4 +2,7 @@
 .venv
 .zed
 __pycache__
+instance
+
+.env
 contacts.txt

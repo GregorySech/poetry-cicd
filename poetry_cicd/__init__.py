@@ -1,40 +1,66 @@
+from dataclasses import dataclass
+from dotenv import load_dotenv
 from flask import Flask, request
 from flask.helpers import flash, redirect
 from flask.templating import render_template
+from flask_sqlalchemy import SQLAlchemy
 
-from poetry_cicd.contact import Contact
+
+from poetry_cicd.contact import Base, Contact
+
+load_dotenv()
 
 
 def foo(x):
     return x + 1
 
 
-def create_app() -> Flask:
-    app = Flask(__name__)
-    app.secret_key = "lalla"
+def setup_db(app: Flask) -> SQLAlchemy:
+    db = SQLAlchemy(model_class=Base)
+    db.init_app(app)
 
-    @app.route("/")
+    with app.app_context():
+        db.create_all()
+
+    return db
+
+
+@dataclass
+class Application:
+    server: Flask
+    db: SQLAlchemy
+
+
+def create_app() -> Application:
+
+    server = Flask(__name__)
+    server.config.from_prefixed_env("HTMCONTACTS")
+    server.secret_key = server.config["SECRET_KEY"]
+
+    db = setup_db(server)
+
+    @server.route("/")
     def index():
-        return redirect("/contacts")
+        return redirect("/contact")
 
-    @app.route("/healthcheck")
+    @server.route("/healthcheck")
     def healthcheck():
         return render_template("healthcheck.html")
 
-    @app.route("/contacts")
+    @server.route("/contact")
     def contacts():
         search = request.args.get("q")
         if search is not None:
-            contacts_set = Contact.search(search)
+            contacts_set = Contact.search(db, search)
         else:
-            contacts_set = Contact.all()
+            contacts_set = Contact.all(db)
         return render_template("index.html", contacts=contacts_set)
 
-    @app.route("/contact/new", methods=["GET"])
+    @server.route("/contact/new", methods=["GET"])
     def contacts_new_get():
-        return render_template("new_contact.html", contact=Contact())
+        return render_template("new_contact.html", contact=Contact(), errors={})
 
-    @app.route("/contact/new", methods=["POST"])
+    @server.route("/contact/new", methods=["POST"])
     def contacts_new_post():
         c = Contact(
             first=request.form["first_name"],
@@ -42,11 +68,17 @@ def create_app() -> Flask:
             phone=request.form["phone"],
             email=request.form["email"],
         )
-
-        if c.save():
+        try:
+            db.session.add(c)
+            db.session.commit()
             flash("Created new contact!")
-            return redirect("/contacts")
-        else:
-            return render_template("new_contact.html", contact=c)
+            return redirect("/contact")
+        except:
+            return render_template("new_contact.html", contact=c, errors={})
 
-    return app
+    @server.route("/contact/<contact_id>")
+    def contact_view(contact_id=0):
+        contact = Contact.find(db, contact_id)
+        return render_template("show.html", contact=contact)
+
+    return Application(server=server, db=db)

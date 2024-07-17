@@ -1,25 +1,7 @@
-from flask.app import Flask
-from flask.testing import FlaskCliRunner, FlaskClient
-import pytest
+from flask.testing import FlaskClient
 
 from poetry_cicd import create_app
-
-
-@pytest.fixture
-def app():
-    app = create_app()
-
-    yield app
-
-
-@pytest.fixture
-def client(app: Flask) -> FlaskClient:
-    return app.test_client()
-
-
-@pytest.fixture
-def runner(app: Flask) -> FlaskCliRunner:
-    return app.test_cli_runner()
+from tests.fixtures import *
 
 
 def test_healthcheck(client: FlaskClient):

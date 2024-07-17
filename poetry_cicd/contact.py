@@ -1,48 +1,42 @@
+from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Optional, Set, Self
+
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import select
+from sqlalchemy.orm import DeclarativeBase, Session, mapped_column
+from sqlalchemy.orm.base import Mapped
+from sqlalchemy.types import Text
 
 
-@dataclass(frozen=True)
-class Contact:
-    first: Optional[str] = None
-    last: Optional[str] = None
-    phone: Optional[str] = None
-    email: Optional[str] = None
-    _errors: frozenset = field(default_factory=frozenset)
+class Base(DeclarativeBase):
+    pass
 
-    @property
-    def errors(self):
-        return dict(self._errors)
 
-    def save(self) -> bool:
-        with open("contacts.txt", "a") as contacts_file:
-            try:
-                print(
-                    f"{self.first} {self.last} {self.phone} {self.email}",
-                    file=contacts_file,
-                )
-            except:
-                return False
-            return True
+class Contact(Base):
+    __tablename__ = "contact"
 
-    @staticmethod
-    def search(query: str):
-        all_contacts = Contact.all()
-        all_contacts = [
-            contact
-            for contact in all_contacts
-            if contact.first is not None and query in contact.first
-        ]
-        return all_contacts
+    id: Mapped[int] = mapped_column(primary_key=True)
+    first: Mapped[Optional[str]] = mapped_column(Text)
+    last: Mapped[Optional[str]] = mapped_column(Text)
+    phone: Mapped[Optional[str]] = mapped_column(Text)
+    email: Mapped[Optional[str]] = mapped_column(Text)
+
+    def __repr__(self) -> str:
+        return f"Contact(id={self.id!r}, first={self.first!r}, last={self.last!r}, phone={self.phone!r}, email={self.email!r})"
 
     @staticmethod
-    def all():
-        with open("contacts.txt", "r") as contacts_file:
-            lines = contacts_file.readlines()
-            return {contact_from_file_line(line) for line in lines}
+    def search(db: SQLAlchemy, query: str) -> Set[Contact]:
+        statement = select(Contact).where(Contact.first.contains(query))
+        all = set(db.session.scalars(statement))
+        return all
 
+    @staticmethod
+    def all(db: SQLAlchemy) -> Set[Contact]:
+        statement = select(Contact)
+        all = set(db.session.scalars(statement))
+        return all
 
-def contact_from_file_line(line: str) -> Contact:
-    elems = line.split(" ")
-    assert len(elems) == 4
-    return Contact(first=elems[0], last=elems[1], phone=elems[2], email=elems[3])
+    @staticmethod
+    def find(db: SQLAlchemy, id: int) -> Contact | None:
+        return db.session.execute(select(Contact).where(Contact.id == id)).scalar()

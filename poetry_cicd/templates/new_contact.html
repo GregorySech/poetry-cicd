@@ -12,7 +12,7 @@
                 placeholder="Email"
                 value="{{ contact.email or ''}}"
             />
-            <span class="error">{{ contact.errors['email'] }}</span>
+            <span class="error">{{ errors['email'] }}</span>
         </p>
         <p>
             <label for="first_name">First Name</label>
@@ -23,7 +23,7 @@
                 placeholder="First Name"
                 value="{{ contact.first or '' }}"
             />
-            <span class="error">{{ contact.errors['first'] }}</span>
+            <span class="error">{{ errors['first'] }}</span>
         </p>
         <p>
             <label for="last_name">Last Name</label>
@@ -34,7 +34,7 @@
                 placeholder="Last Name"
                 value="{{ contact.last or '' }}"
             />
-            <span class="error">{{ contact.errors['last'] }}</span>
+            <span class="error">{{ errors['last'] }}</span>
         </p>
         <p>
             <label for="phone">Phone</label>
@@ -45,14 +45,14 @@
                 placeholder="Phone"
                 value="{{ contact.phone or '' }}"
             />
-            <span class="error">{{ contact.errors['phone'] }}</span>
+            <span class="error">{{ errors['phone'] }}</span>
         </p>
         <button>Save</button>
     </fieldset>
 </form>
 
 <p>
-    <a href="/contacts">Back</a>
+    <a href="/contact">Back</a>
 </p>
 
 {% endblock %}
