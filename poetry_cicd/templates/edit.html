@@ -1,0 +1,61 @@
+{% extends 'layout.html' %} {% block content %} {% if contact is none %}
+<h1>No contact to edit!</h1>
+{% else %}
+<form action="/contact/{{ contact.id }}/edit" method="post">
+    <fieldset>
+        <legend>Contact Values</legend>
+        <p>
+            <label for="email">Email</label>
+            <input
+                name="email"
+                id="email"
+                type="text"
+                placeholder="Email"
+                value="{{ contact.email }}"
+            />
+            <span class="error">{{ errors['email'] }}</span>
+        </p>
+        <p>
+            <label for="first_name">First Name</label>
+            <input
+                name="first_name"
+                id="first_name"
+                type="text"
+                placeholder="First Name"
+                value="{{ contact.first }}"
+            />
+            <span class="error">{{ errors['first'] }}</span>
+        </p>
+        <p>
+            <label for="last_name">Last Name</label>
+            <input
+                name="last_name"
+                id="last_name"
+                type="text"
+                placeholder="Last Name"
+                value="{{ contact.last }}"
+            />
+            <span class="error">{{ errors['last'] }}</span>
+        </p>
+        <p>
+            <label for="phone">Phone</label>
+            <input
+                name="phone"
+                id="phone"
+                type="text"
+                placeholder="Phone"
+                value="{{ contact.phone }}"
+            />
+            <span class="error">{{ errors['phone'] }}</span>
+        </p>
+        <button>Save</button>
+    </fieldset>
+</form>
+<form action="/contact/{{ contact.id }}/delete" method="post">
+    <button>Delete Contact</button>
+</form>
+
+<p>
+    <a href="/contact">Back</a>
+</p>
+{% endif %} {% endblock %}

@@ -40,3 +40,6 @@ class Contact(Base):
     @staticmethod
     def find(db: SQLAlchemy, id: int) -> Contact | None:
         return db.session.execute(select(Contact).where(Contact.id == id)).scalar()
+
+    def delete(self, db: SQLAlchemy):
+        db.session.delete(self)

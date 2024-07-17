@@ -31,7 +31,7 @@ class Application:
     db: SQLAlchemy
 
 
-def create_app() -> Application:
+def create_testable_app() -> Application:
 
     server = Flask(__name__)
     server.config.from_prefixed_env("HTMCONTACTS")
@@ -81,4 +81,39 @@ def create_app() -> Application:
         contact = Contact.find(db, contact_id)
         return render_template("show.html", contact=contact)
 
+    @server.route("/contact/<contact_id>/edit", methods=["GET"])
+    def contact_edit_get(contact_id=0):
+        contact = Contact.find(db, contact_id)
+        return render_template("edit.html", contact=contact, errors={})
+
+    @server.route("/contact/<contact_id>/edit", methods=["POST"])
+    def contact_edit_post(contact_id=0):
+        contact = Contact.find(db, contact_id)
+        if contact is not None:
+            contact.first = request.form["first_name"]
+            contact.last = request.form["last_name"]
+            contact.email = request.form["email"]
+            contact.phone = request.form["phone"]
+        db.session.merge(contact)
+        try:
+            db.session.commit()
+            flash("Updated Contact!")
+            return redirect(f"/contact/{contact_id}")
+        except:
+            return render_template("edit.html", contact=contact, errors={})
+
+    @server.route("/contact/<contact_id>/delete", methods=["POST"])
+    def contact_delete(contact_id=0):
+        contact = Contact.find(db, contact_id)
+        if contact is not None:
+            contact.delete(db)
+        db.session.commit()
+        flash("Deleted Contact!")
+        return redirect("/contact")
+
     return Application(server=server, db=db)
+
+
+def create_app():
+    app = create_testable_app()
+    return app.server
